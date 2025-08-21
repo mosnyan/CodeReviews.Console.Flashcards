@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flashcards.mosnyan", "Flashcards.mosnyan\Flashcards.mosnyan.csproj", "{09E84DCF-7230-4F33-8B4F-DE72382A8B84}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlashcardsTests.mosnyan", "FlashcardsTests.mosnyan\FlashcardsTests.mosnyan.csproj", "{FC84A062-291D-452C-8696-63A47A86BB15}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{09E84DCF-7230-4F33-8B4F-DE72382A8B84}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09E84DCF-7230-4F33-8B4F-DE72382A8B84}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09E84DCF-7230-4F33-8B4F-DE72382A8B84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC84A062-291D-452C-8696-63A47A86BB15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC84A062-291D-452C-8696-63A47A86BB15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC84A062-291D-452C-8696-63A47A86BB15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC84A062-291D-452C-8696-63A47A86BB15}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
