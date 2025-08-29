@@ -7,7 +7,7 @@ public class Tests
     [Test]
     public void DatabaseIsCreated()
     {
-        var str = "Data Source=localhost;Initial Catalog=flashcards_tests;Integrated Security=True;Encrypt=False;";
+        var str = "Server=localhost;Port=3306;Uid=user;Pwd=password;";
         var initializer = new Initializer(str, "flashcards_tests");
         initializer.Initialize();
         

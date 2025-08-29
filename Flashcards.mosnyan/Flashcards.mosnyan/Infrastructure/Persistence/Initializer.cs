@@ -1,13 +1,10 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using MySqlConnector;
 
 namespace Flashcards.mosnyan.Infrastructure.Persistence;
 
 public class Initializer(string initialConnString, string databaseName)
 {
-    private string ConnectionString { get; } = $"Data Source=localhost;" +
-                                               $"Initial Catalog={databaseName};" +
-                                               $"Integrated Security=True;" +
-                                               $"Encrypt=False;";
+    private string ConnectionString { get; } = $"Server=localhost;Port=3306;Database={databaseName};Uid=user;Pwd=password;";
     public void Initialize()
     {
         CreateDatabase();
@@ -18,75 +15,71 @@ public class Initializer(string initialConnString, string databaseName)
 
     public bool DoesDatabaseExists()
     {
-        using var connection = new SqlConnection(initialConnString);
+        using var connection = new MySqlConnection(initialConnString);
 
         connection.Open();
-        var query = $"SELECT database_id FROM sys.databases WHERE name = '{databaseName}'";
-        var command = new SqlCommand(query, connection);
+        var query = $"SHOW DATABASES LIKE '{databaseName}';";
+        var command = new MySqlCommand(query, connection);
         var result = command.ExecuteScalar();
 
-        return (int)result > 0;
+        return true;
     }
 
     private void CreateDatabase()
     {
-        using var connection = new SqlConnection(ConnectionString);
+        using var connection = new MySqlConnection(initialConnString);
         
         connection.Open();
-        var query = $"IF (DB_ID('{databaseName}') IS NULL) " +
-                    $"CREATE DATABASE [{databaseName}];";
-        var command = new SqlCommand(query, connection);
+        var query = $"CREATE DATABASE IF NOT EXISTS {databaseName};";
+        var command = new MySqlCommand(query, connection);
         command.ExecuteNonQuery();
     }
 
     private void CreateStacksTable()
     {
-        using var connection = new SqlConnection(ConnectionString);
+        using var connection = new MySqlConnection(ConnectionString);
 
         connection.Open();
-        var query = "IF (OBJECT_ID(N'stacks', N'U') IS NULL) " +
-                    "CREATE TABLE stacks" +
+        var query = "CREATE TABLE IF NOT EXISTS stacks" +
                     " (" +
-                    "id uniqueidentifier PRIMARY KEY," +
-                    "subject text NOT NULL" +
+                    "id UUID PRIMARY KEY," +
+                    "subject TEXT NOT NULL" +
                     ");";
-        var command = new SqlCommand(query, connection);
+        var command = new MySqlCommand(query, connection);
         command.ExecuteNonQuery();
     }
 
     private void CreateCardsTable()
     {
-        using var connection = new SqlConnection(ConnectionString);
+        using var connection = new MySqlConnection(ConnectionString);
         
         connection.Open();
-        var query = "IF (OBJECT_ID(N'cards', N'U') IS NULL) " +
-                    "CREATE TABLE cards" +
+        var query = "CREATE TABLE IF NOT EXISTS cards" +
                     " (" +
-                    "id uniqueidentifier PRIMARY KEY," +
-                    "prompt text NOT NULL," +
-                    "answer text NOT NULL," +
-                    "stack_id uniqueidentifier NOT NULL," +
+                    "id UUID PRIMARY KEY," +
+                    "prompt TEXT NOT NULL," +
+                    "answer TEXT NOT NULL," +
+                    "stack_id UUID NOT NULL," +
                     "FOREIGN KEY (stack_id) REFERENCES stacks(id) ON DELETE CASCADE" +
                     ");";
-        var command = new SqlCommand(query, connection);
+        var command = new MySqlCommand(query, connection);
         command.ExecuteNonQuery();
     }
 
     private void CreateHistoryTable()
     {
-        using var connection = new SqlConnection(ConnectionString);
+        using var connection = new MySqlConnection(ConnectionString);
         
         connection.Open();
-        var query = "IF (OBJECT_ID(N'history', N'U') IS NULL) " +
-                    "CREATE TABLE history" +
+        var query = "CREATE TABLE IF NOT EXISTS history" +
                     " (" +
-                    "id uniqueidentifier PRIMARY KEY," +
-                    "t_stamp datetime NOT NULL," +
-                    "score float NOT NULL," +
-                    "stack_id uniqueidentifier NOT NULL," +
+                    "id UUID PRIMARY KEY," +
+                    "t_stamp DATETIME NOT NULL," +
+                    "score FLOAT NOT NULL," +
+                    "stack_id UUID NOT NULL," +
                     "FOREIGN KEY (stack_id) REFERENCES stacks(id) ON DELETE CASCADE" +
                     ");";
-        var command = new SqlCommand(query, connection);
+        var command = new MySqlCommand(query, connection);
         command.ExecuteNonQuery();
     }
 }

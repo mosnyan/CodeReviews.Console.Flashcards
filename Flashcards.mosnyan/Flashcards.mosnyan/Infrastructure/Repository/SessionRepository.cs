@@ -1,7 +1,7 @@
 ﻿using Dapper;
 using Flashcards.mosnyan.Application.Abstractions.Repositories;
 using Flashcards.mosnyan.Domain.Models;
-using Microsoft.Data.SqlClient;
+using MySqlConnector;
 
 namespace Flashcards.mosnyan.Infrastructure.Repository;
 
@@ -9,7 +9,7 @@ public class SessionRepository(string connectionString) : ISessionRepository
 {
     public bool CreateNewSession(Session session)
     {
-        using var connection = new SqlConnection(connectionString);
+        using var connection = new MySqlConnection(connectionString);
 
         var query = "INSERT INTO history (id, t_stamp, score, stack_id) " +
                     "VALUES (@Id, @TimeStamp, @Score, @StackId)";
@@ -26,7 +26,7 @@ public class SessionRepository(string connectionString) : ISessionRepository
 
     public IEnumerable<Session> ReadAllSessions()
     {
-        using var connection = new SqlConnection(connectionString);
+        using var connection = new MySqlConnection(connectionString);
 
         var query = "SELECT * FROM history";
 

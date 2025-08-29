@@ -1,4 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using MySqlConnector;
 using Dapper;
 using Flashcards.mosnyan.Domain.Models;
 using Flashcards.mosnyan.Infrastructure.Repository;
@@ -7,17 +7,18 @@ namespace FlashcardsTests.mosnyan;
 
 public class RepositoryTests
 {
-    private const String ConnectionString = $"Data Source=localhost;" +
-                                            $"Initial Catalog=flashcards_tests;" +
-                                            $"Integrated Security=True;" +
-                                            $"Encrypt=False;";
+    private const String ConnectionString = "Server=localhost;" +
+                                            "Port=3306;" +
+                                            "Database=flashcards_tests;" +
+                                            "Uid=user;" +
+                                            "Pwd=password;";
 
     private StackRepository repo = new(ConnectionString);
     
     [SetUp]
     public void SetUp()
     {
-        using var connection = new SqlConnection(ConnectionString);
+        using var connection = new MySqlConnection(ConnectionString);
         var query = "DELETE FROM stacks;";
         connection.Execute(query);
     }

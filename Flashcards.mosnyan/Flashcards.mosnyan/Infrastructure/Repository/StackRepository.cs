@@ -1,8 +1,8 @@
 ﻿using Dapper;
 using Flashcards.mosnyan.Application.Abstractions.Repositories;
 using Flashcards.mosnyan.Domain.Models;
-using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;
+using MySqlConnector;
 
 namespace Flashcards.mosnyan.Infrastructure.Repository;
 
@@ -10,7 +10,7 @@ public class StackRepository(string connectionString) : IStackRepository
 {
     public bool CreateNewStack(FlashcardStack flashcardStack)
     {
-        using var connection = new SqlConnection(connectionString);
+        using var connection = new MySqlConnection(connectionString);
         connection.Open();
         using var transaction = connection.BeginTransaction();
 
@@ -37,7 +37,7 @@ public class StackRepository(string connectionString) : IStackRepository
 
     public IEnumerable<FlashcardStack> ReadAllStacks()
     {
-        using var connection = new SqlConnection(connectionString);
+        using var connection = new MySqlConnection(connectionString);
 
         var query = "SELECT s.id, s.subject, c.id AS cardId, c.prompt, c.answer, c.stack_id AS stackId " +
                     "FROM stacks AS s " +
@@ -45,7 +45,7 @@ public class StackRepository(string connectionString) : IStackRepository
 
         var stackDict = new Dictionary<Guid, FlashcardStack>();
 
-        connection.Query<FlashcardStack, Flashcard, FlashcardStack>(
+        connection.Query<FlashcardStack, Flashcard?, FlashcardStack>(
             query, (stack, card) =>
             {
                 if (!stackDict.TryGetValue(stack.Id, out var currentStack))
@@ -54,7 +54,10 @@ public class StackRepository(string connectionString) : IStackRepository
                     stackDict.Add(currentStack.Id, currentStack);
                 }
 
-                currentStack.AddCard(card);
+                if (card is not null)
+                {
+                    currentStack.AddCard(card);
+                }
 
                 return currentStack;
             }, splitOn: "cardId"
@@ -65,7 +68,7 @@ public class StackRepository(string connectionString) : IStackRepository
 
     public FlashcardStack? ReadStackById(Guid id)
     {
-        using var connection = new SqlConnection(connectionString);
+        using var connection = new MySqlConnection(connectionString);
 
         var query = "SELECT s.id, s.subject, c.id AS cardId, c.prompt, c.answer, c.stack_id AS stackId " +
                     "FROM stacks AS s " +
@@ -104,7 +107,7 @@ public class StackRepository(string connectionString) : IStackRepository
 
     public bool UpdateStack(FlashcardStack flashcardStack)
     {
-        using var connection = new SqlConnection(connectionString);
+        using var connection = new MySqlConnection(connectionString);
         connection.Open();
         using var transaction = connection.BeginTransaction();
 
@@ -121,11 +124,8 @@ public class StackRepository(string connectionString) : IStackRepository
                     "WHERE id = @Id";
             connection.Execute(query, flashcardStack.GetCards(), transaction);
 
-            query = "IF NOT EXISTS (SELECT 1 FROM cards WHERE id = @Id) " +
-                    "BEGIN " +
-                    "INSERT INTO cards (id, prompt, answer, stack_id) " +
-                    "VALUES (@Id, @Prompt, @Answer, @StackId) " +
-                    "END";
+            query = "INSERT IGNORE INTO cards (id, prompt, answer, stack_id) " +
+                    "VALUES (@Id, @Prompt, @Answer, @StackId)";
             
             connection.Execute(query, flashcardStack.GetCards(), transaction);
             
@@ -142,7 +142,7 @@ public class StackRepository(string connectionString) : IStackRepository
 
     public bool DeleteStack(FlashcardStack flashcardStack)
     {
-        using var connection = new SqlConnection(connectionString);
+        using var connection = new MySqlConnection(connectionString);
 
         var query = "DELETE FROM stacks WHERE id = @Id";
         
@@ -151,7 +151,7 @@ public class StackRepository(string connectionString) : IStackRepository
 
     public bool DeleteStackById(Guid id)
     {
-        using var connection = new SqlConnection(connectionString);
+        using var connection = new MySqlConnection(connectionString);
 
         var query = $"DELETE FROM stacks WHERE id = {id}";
         
